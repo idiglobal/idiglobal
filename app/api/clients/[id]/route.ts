@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth()
+  const role = (session?.user as { role?: string })?.role
+  if (role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+  const { id } = await params
+
+  // Desvincular usuario antes de borrar
+  await prisma.user.updateMany({ where: { clientId: id }, data: { clientId: null } })
+  await prisma.client.delete({ where: { id } })
+
+  return NextResponse.json({ ok: true })
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   const role = (session?.user as { role?: string })?.role

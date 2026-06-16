@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { ClientForm } from "@/components/admin/ClientForm"
+import { ClientTableActions } from "@/components/admin/ClientTableActions"
 
 export default async function EditClientPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -16,6 +17,9 @@ export default async function EditClientPage({ params }: { params: Promise<{ id:
           <ArrowLeft size={16} className="text-slate-500" />
         </Link>
         <h1 className="text-xl font-semibold text-slate-900">Editar cliente</h1>
+        <div className="ml-auto">
+          <ClientTableActions id={client.id} name={client.companyName} />
+        </div>
       </div>
       <div className="bg-white border border-slate-200 rounded-xl p-6">
         <ClientForm

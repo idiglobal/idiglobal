@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
-import { formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { Plus, Users } from "lucide-react"
+import { Plus } from "lucide-react"
+import { ClientTableActions } from "@/components/admin/ClientTableActions"
 
 export default async function ClientsPage() {
   const clients = await prisma.client.findMany({
@@ -50,12 +50,7 @@ export default async function ClientsPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <Link
-                    href={`/dashboard/clients/${client.id}`}
-                    className="text-teal-600 hover:text-teal-700 text-xs font-medium"
-                  >
-                    Editar →
-                  </Link>
+                  <ClientTableActions id={client.id} name={client.companyName} />
                 </td>
               </tr>
             ))}
