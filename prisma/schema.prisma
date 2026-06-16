@@ -57,9 +57,10 @@ model Order {
   supplier       Supplier?   @relation(fields: [supplierId], references: [id])
   items          OrderItem[]
   notes          OrderNote[]
-  totalAmount    Float       @default(0)
-  referenceFiles String?
-  clientNotes    String?
+  totalAmount      Float       @default(0)
+  referenceFiles   String?
+  designPlacement  String?
+  clientNotes      String?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 }

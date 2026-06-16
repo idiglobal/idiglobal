@@ -6,7 +6,7 @@ import Link from "next/link"
 import { StatusBadge } from "@/components/ui/Badge"
 import { StatusPipeline } from "@/components/ui/StatusPipeline"
 import { OrderActions } from "@/components/admin/OrderActions"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Download, FileText, ImageIcon, Ruler } from "lucide-react"
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -107,10 +107,63 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </table>
           </div>
 
+          {/* Design files */}
+          {order.referenceFiles && (() => {
+            let files: { url: string; name: string; size: number }[] = []
+            try { files = JSON.parse(order.referenceFiles) } catch { /* ignore */ }
+            if (files.length === 0) return null
+            return (
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+                  <FileText size={15} className="text-teal-600" />
+                  <h2 className="font-semibold text-slate-800 text-sm">Archivos de diseño del cliente</h2>
+                  <span className="ml-auto text-xs text-slate-400">{files.length} archivo{files.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="p-4 space-y-2">
+                  {files.map((f) => {
+                    const ext = f.name.split(".").pop()?.toLowerCase() ?? ""
+                    const isImage = ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext)
+                    const sizeFmt = f.size < 1024 * 1024
+                      ? `${(f.size / 1024).toFixed(1)} KB`
+                      : `${(f.size / (1024 * 1024)).toFixed(1)} MB`
+                    return (
+                      <a
+                        key={f.url}
+                        href={f.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-200 rounded-lg transition group"
+                      >
+                        {isImage
+                          ? <ImageIcon size={15} className="text-teal-500 shrink-0" />
+                          : <FileText size={15} className="text-slate-400 shrink-0" />
+                        }
+                        <span className="text-sm text-slate-700 truncate flex-1 group-hover:text-teal-700">{f.name}</span>
+                        <span className="text-xs text-slate-400 shrink-0">{sizeFmt}</span>
+                        <Download size={13} className="text-slate-300 group-hover:text-teal-500 shrink-0" />
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Design placement */}
+          {order.designPlacement && (
+            <div className="bg-white border border-slate-200 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Ruler size={14} className="text-teal-600" />
+                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Ubicación y medidas del diseño</p>
+              </div>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{order.designPlacement}</p>
+            </div>
+          )}
+
           {/* Client notes */}
           {order.clientNotes && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <p className="text-xs font-medium text-amber-700 mb-1">Notas del cliente</p>
+              <p className="text-xs font-medium text-amber-700 mb-1">Notas generales del cliente</p>
               <p className="text-sm text-amber-900">{order.clientNotes}</p>
             </div>
           )}

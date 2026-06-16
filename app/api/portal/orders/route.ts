@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const { items, totalAmount, clientNotes } = await req.json()
+  const { items, totalAmount, clientNotes, designPlacement, referenceFiles } = await req.json()
 
   const lastOrder = await prisma.order.findFirst({
     orderBy: { createdAt: "desc" },
@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
       orderNumber,
       clientId,
       totalAmount,
-      clientNotes,
+      clientNotes: clientNotes || null,
+      designPlacement: designPlacement || null,
+      referenceFiles: referenceFiles || null,
       status: "QUOTE_SENT",
       items: { create: items },
     },
