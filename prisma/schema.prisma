@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         Role     @default(CLIENT)
+  clientId     String?  @unique
+  client       Client?  @relation(fields: [clientId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  companyName String
+  contactName String
+  email       String   @unique
+  phone       String?
+  address     String?
+  conditions  String?
+  user        User?
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Supplier {
+  id           String    @id @default(cuid())
+  name         String
+  contactEmail String?
+  contactPhone String?
+  products     String
+  leadTimeDays Int       @default(14)
+  priceTier    PriceTier @default(STANDARD)
+  notes        String?
+  orders       Order[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique
+  status         OrderStatus @default(QUOTE_SENT)
+  clientId       String
+  client         Client      @relation(fields: [clientId], references: [id])
+  supplierId     String?
+  supplier       Supplier?   @relation(fields: [supplierId], references: [id])
+  items          OrderItem[]
+  notes          OrderNote[]
+  totalAmount    Float       @default(0)
+  referenceFiles String?
+  clientNotes    String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     String
+  description String?
+  quantity    Int
+  unitPrice   Float
+  total       Float
+}
+
+model OrderNote {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  content    String
+  isInternal Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum OrderStatus {
+  QUOTE_SENT
+  CONFIRMED
+  IN_PRODUCTION
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PriceTier {
+  ECONOMY
+  STANDARD
+  PREMIUM
+}
