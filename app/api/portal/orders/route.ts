@@ -37,7 +37,21 @@ export async function POST(req: NextRequest) {
       designPlacement: designPlacement || null,
       referenceFiles: referenceFiles || null,
       status: "QUOTE_SENT",
-      items: { create: items },
+      items: {
+        create: items.map((it: {
+          productId?: string; product: string; description?: string
+          color?: string; size?: string; quantity: number; unitPrice: number; total: number
+        }) => ({
+          productId: it.productId ?? null,
+          product: it.product,
+          description: it.description ?? null,
+          color: it.color ?? null,
+          size: it.size ?? null,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          total: it.total,
+        })),
+      },
     },
   })
 

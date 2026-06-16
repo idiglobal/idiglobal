@@ -43,8 +43,28 @@ model Supplier {
   priceTier    PriceTier @default(STANDARD)
   notes        String?
   orders       Order[]
+  catalog      Product[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  reference   String      @unique
+  name        String
+  description String?
+  category    String?
+  unitPrice   Float
+  supplierId  String?
+  supplier    Supplier?   @relation(fields: [supplierId], references: [id])
+  colors      String?
+  sizes       String?
+  minQuantity Int         @default(1)
+  available   Boolean     @default(true)
+  imageUrl    String?
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Order {
@@ -66,14 +86,18 @@ model Order {
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
-  orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product     String
-  description String?
-  quantity    Int
-  unitPrice   Float
-  total       Float
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String?
+  catalogItem   Product? @relation(fields: [productId], references: [id])
+  product       String
+  description   String?
+  color         String?
+  size          String?
+  quantity      Int
+  unitPrice     Float
+  total         Float
 }
 
 model OrderNote {

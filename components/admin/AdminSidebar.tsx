@@ -9,12 +9,14 @@ import {
   Users,
   Truck,
   FileText,
+  Package,
   LogOut,
 } from "lucide-react"
 
 const links = [
   { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Pedidos", icon: ShoppingBag },
+  { href: "/dashboard/catalog", label: "Catálogo", icon: Package },
   { href: "/dashboard/clients", label: "Clientes", icon: Users },
   { href: "/dashboard/suppliers", label: "Proveedores", icon: Truck },
   { href: "/dashboard/quotes", label: "Presupuestos", icon: FileText },
