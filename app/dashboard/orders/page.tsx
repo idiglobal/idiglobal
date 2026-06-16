@@ -4,6 +4,7 @@ import { OrderStatus } from "@/app/generated/prisma/client"
 import Link from "next/link"
 import { StatusBadge } from "@/components/ui/Badge"
 import { Plus } from "lucide-react"
+import { OrderTableActions } from "@/components/admin/OrderTableActions"
 
 export default async function OrdersPage({
   searchParams,
@@ -139,12 +140,15 @@ export default async function OrdersPage({
                   </td>
                   <td className="px-4 py-3 text-slate-400">{formatDate(order.createdAt)}</td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/dashboard/orders/${order.id}`}
-                      className="text-teal-600 hover:text-teal-700 text-xs font-medium"
-                    >
-                      Ver →
-                    </Link>
+                    <div className="flex items-center gap-2 justify-end">
+                      <Link
+                        href={`/dashboard/orders/${order.id}`}
+                        className="text-teal-600 hover:text-teal-700 text-xs font-medium"
+                      >
+                        Ver →
+                      </Link>
+                      <OrderTableActions orderId={order.id} orderNumber={order.orderNumber} />
+                    </div>
                   </td>
                 </tr>
               ))}
