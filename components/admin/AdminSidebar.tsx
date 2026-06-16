@@ -33,7 +33,7 @@ export function AdminSidebar() {
             <span className="text-white font-bold text-sm">IG</span>
           </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">IdentiGlobal</p>
+            <p className="text-white font-semibold text-sm leading-tight">Identikglobal</p>
             <p className="text-slate-400 text-xs">Panel Admin</p>
           </div>
         </div>

@@ -22,7 +22,7 @@ export function ClientSidebar({ companyName }: { companyName: string }) {
             <span className="text-white font-bold text-sm">IG</span>
           </div>
           <div className="min-w-0">
-            <p className="text-white font-semibold text-sm leading-tight">IdentiGlobal</p>
+            <p className="text-white font-semibold text-sm leading-tight">Identikglobal</p>
             <p className="text-slate-400 text-xs truncate">{companyName}</p>
           </div>
         </div>

@@ -83,7 +83,7 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-600 mb-4">
             <span className="text-white font-bold text-xl">IG</span>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900">IdentiGlobal</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Identikglobal</h1>
           <p className="text-slate-500 mt-1 text-sm">Solicitar acceso como cliente</p>
         </div>
 

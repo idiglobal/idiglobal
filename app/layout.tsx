@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "IdentiGlobal — Gestión de Pedidos",
+  title: "Identikglobal — Gestión de Pedidos",
   description: "Plataforma B2B de personalización textil",
 }
 

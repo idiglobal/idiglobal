@@ -292,7 +292,7 @@ export function NewOrderForm() {
             ))}
 
             <div className="px-5 py-3 bg-slate-50 flex justify-between items-center">
-              <span className="text-xs text-slate-400">* Precios orientativos. IdentiGlobal confirmará el presupuesto final.</span>
+              <span className="text-xs text-slate-400">* Precios orientativos. Identikglobal confirmará el presupuesto final.</span>
               <span className="text-sm font-bold text-slate-900">Total estimado: {formatCurrency(total)}</span>
             </div>
           </div>
