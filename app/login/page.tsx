@@ -91,12 +91,14 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <p className="text-xs text-slate-400 font-medium mb-2">Cuentas de prueba:</p>
-            <div className="space-y-1 text-xs text-slate-500">
-              <p><span className="font-medium">Admin:</span> admin@idiglobal.com / admin123</p>
-              <p><span className="font-medium">Cliente:</span> maria@textilesmontserrat.com / client123</p>
-            </div>
+          <div className="mt-5 pt-5 border-t border-slate-100 text-center">
+            <p className="text-sm text-slate-500 mb-3">¿Aún no tienes cuenta?</p>
+            <a
+              href="/register"
+              className="w-full inline-block text-center border border-teal-600 text-teal-600 hover:bg-teal-50 font-medium py-2.5 px-4 rounded-lg text-sm transition"
+            >
+              Solicitar acceso como cliente
+            </a>
           </div>
         </div>
       </div>
