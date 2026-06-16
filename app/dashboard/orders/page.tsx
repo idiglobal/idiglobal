@@ -2,9 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { formatCurrency, formatDate, STATUS_LABELS } from "@/lib/utils"
 import { OrderStatus } from "@/app/generated/prisma/client"
 import Link from "next/link"
-import { StatusBadge } from "@/components/ui/Badge"
 import { Plus } from "lucide-react"
 import { OrderTableActions } from "@/components/admin/OrderTableActions"
+import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect"
 
 export default async function OrdersPage({
   searchParams,
@@ -132,7 +132,7 @@ export default async function OrdersPage({
                   <td className="px-4 py-3 font-medium text-slate-800">{order.orderNumber}</td>
                   <td className="px-4 py-3 text-slate-600">{order.client.companyName}</td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={order.status as OrderStatus} />
+                    <OrderStatusSelect orderId={order.id} currentStatus={order.status as OrderStatus} />
                   </td>
                   <td className="px-4 py-3 text-slate-500">{order.supplier?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
