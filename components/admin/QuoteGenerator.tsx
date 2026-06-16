@@ -8,6 +8,13 @@ import { Plus, Trash2, FileDown } from "lucide-react"
 type Client = { id: string; companyName: string; contactName: string; email: string }
 type LineItem = { product: string; description: string; quantity: number; unitPrice: number }
 
+const IVA_OPTIONS = [
+  { label: "21%", value: 0.21 },
+  { label: "10%", value: 0.10 },
+  { label: "4%",  value: 0.04 },
+  { label: "0%",  value: 0    },
+]
+
 export function QuoteGenerator({
   clients,
   nextOrderNumber,
@@ -20,6 +27,7 @@ export function QuoteGenerator({
   const [items, setItems] = useState<LineItem[]>([
     { product: "", description: "", quantity: 1, unitPrice: 0 },
   ])
+  const [ivaRate, setIvaRate] = useState(0.21)
   const [loading, setLoading] = useState(false)
   const [created, setCreated] = useState<string | null>(null)
 
@@ -37,7 +45,9 @@ export function QuoteGenerator({
     setItems((prev) => prev.filter((_, idx) => idx !== i))
   }
 
-  const total = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0)
+  const subtotal = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0)
+  const ivaAmount = subtotal * ivaRate
+  const total = subtotal + ivaAmount
 
   async function generate() {
     if (!clientId || items.some((it) => !it.product)) return
@@ -69,9 +79,10 @@ export function QuoteGenerator({
 
     const doc = new jsPDF()
 
+    // Header
     doc.setFontSize(20)
     doc.setTextColor(15, 118, 110)
-    doc.text("IDIGLOBAL", 14, 22)
+    doc.text("IDENTIKGLOBAL", 14, 22)
 
     doc.setFontSize(10)
     doc.setTextColor(100)
@@ -79,6 +90,7 @@ export function QuoteGenerator({
     doc.text(`Presupuesto: ${nextOrderNumber}`, 14, 38)
     doc.text(`Fecha: ${new Date().toLocaleDateString("es-ES")}`, 14, 44)
 
+    // Client info
     doc.setFontSize(11)
     doc.setTextColor(30)
     doc.text("Cliente:", 14, 58)
@@ -87,6 +99,8 @@ export function QuoteGenerator({
     doc.text(client.companyName, 14, 65)
     doc.text(client.contactName, 14, 71)
     doc.text(client.email, 14, 77)
+
+    const ivaLabel = IVA_OPTIONS.find((o) => o.value === ivaRate)?.label ?? `${(ivaRate * 100).toFixed(0)}%`
 
     autoTable(doc, {
       startY: 90,
@@ -98,14 +112,30 @@ export function QuoteGenerator({
         formatCurrency(it.unitPrice),
         formatCurrency(it.quantity * it.unitPrice),
       ]),
-      foot: [["", "", "", "TOTAL", formatCurrency(total)]],
+      foot: [
+        ["", "", "", "Base imponible", formatCurrency(subtotal)],
+        ["", "", "", `IVA (${ivaLabel})`,  formatCurrency(ivaAmount)],
+        ["", "", "", "TOTAL",              formatCurrency(total)],
+      ],
       headStyles: { fillColor: [15, 118, 110] },
       footStyles: { fillColor: [240, 253, 250], textColor: [15, 118, 110], fontStyle: "bold" },
       styles: { fontSize: 9 },
+      // Only make the last foot row bold
+      didParseCell: (data) => {
+        if (data.section === "foot") {
+          if (data.row.index < 2) {
+            data.cell.styles.fontStyle = "normal"
+            data.cell.styles.textColor = [80, 80, 80]
+            data.cell.styles.fillColor = [250, 250, 250]
+          }
+        }
+      },
     })
 
     doc.save(`${nextOrderNumber}.pdf`)
   }
+
+  const ivaLabel = IVA_OPTIONS.find((o) => o.value === ivaRate)?.label ?? ""
 
   return (
     <div className="space-y-5 max-w-3xl">
@@ -202,10 +232,47 @@ export function QuoteGenerator({
           ))}
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-100 flex justify-end">
-          <span className="text-sm font-semibold text-slate-900">
-            Total: {formatCurrency(total)}
-          </span>
+        {/* Totals block */}
+        <div className="px-5 py-4 border-t border-slate-100 space-y-2">
+          {/* IVA selector */}
+          <div className="flex items-center justify-end gap-3">
+            <span className="text-sm text-slate-500">Tipo de IVA:</span>
+            <div className="flex gap-1">
+              {IVA_OPTIONS.map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => setIvaRate(opt.value)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium border transition ${
+                    ivaRate === opt.value
+                      ? "bg-teal-600 text-white border-teal-600"
+                      : "border-slate-200 text-slate-500 hover:border-teal-400 hover:text-teal-600"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Subtotal */}
+          <div className="flex justify-end gap-4 text-sm text-slate-500">
+            <span>Base imponible</span>
+            <span className="w-28 text-right">{formatCurrency(subtotal)}</span>
+          </div>
+
+          {/* IVA */}
+          <div className="flex justify-end gap-4 text-sm text-slate-500">
+            <span>IVA ({ivaLabel})</span>
+            <span className="w-28 text-right">{formatCurrency(ivaAmount)}</span>
+          </div>
+
+          {/* Total */}
+          <div className="flex justify-end gap-4 border-t border-slate-100 pt-2">
+            <span className="text-sm font-semibold text-slate-900">Total</span>
+            <span className="w-28 text-right text-sm font-semibold text-slate-900">
+              {formatCurrency(total)}
+            </span>
+          </div>
         </div>
       </div>
 
