@@ -6,6 +6,7 @@ import Link from "next/link"
 import { StatusBadge } from "@/components/ui/Badge"
 import { StatusPipeline } from "@/components/ui/StatusPipeline"
 import { OrderActions } from "@/components/admin/OrderActions"
+import { OrderExpenses } from "@/components/admin/OrderExpenses"
 import { ArrowLeft, Download, FileText, ImageIcon, Ruler } from "lucide-react"
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +18,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       supplier: true,
       items: true,
       notes: { orderBy: { createdAt: "desc" } },
+      expenses: { orderBy: { createdAt: "asc" } },
     },
   })
 
@@ -209,6 +211,16 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             currentSupplierId={order.supplierId}
             statuses={statuses}
             suppliers={suppliers}
+          />
+
+          {/* Expenses & profit — admin only */}
+          <OrderExpenses
+            orderId={order.id}
+            totalAmount={order.totalAmount}
+            initialExpenses={order.expenses.map((e) => ({
+              ...e,
+              createdAt: e.createdAt.toISOString(),
+            }))}
           />
         </div>
       </div>
