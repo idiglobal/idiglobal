@@ -20,7 +20,7 @@ export default async function QuotesPage() {
   const nextOrderNumber = `IG-${currentYear}-${String(nextSeq).padStart(3, "0")}`
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">Generador de presupuestos</h1>
         <p className="text-sm text-slate-500 mt-0.5">Crea presupuestos PDF para clientes</p>

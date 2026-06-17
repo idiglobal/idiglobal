@@ -22,7 +22,7 @@ export default async function PortalPage() {
   )
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Mis pedidos</h1>
@@ -30,21 +30,22 @@ export default async function PortalPage() {
         </div>
         <Link
           href="/portal/orders/new"
-          className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+          className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-3 sm:px-4 py-2 rounded-lg transition"
         >
           <Plus size={15} />
-          Nuevo pedido
+          <span className="hidden sm:inline">Nuevo pedido</span>
+          <span className="sm:hidden">Nuevo</span>
         </Link>
       </div>
 
-      {/* Active orders with pipeline */}
+      {/* Active orders */}
       {active.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
             Pedidos activos
           </h2>
           {active.map((order) => (
-            <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-5">
+            <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="font-semibold text-slate-800">{order.orderNumber}</p>
@@ -68,12 +69,46 @@ export default async function PortalPage() {
         </div>
       )}
 
-      {/* All orders table */}
+      {/* Order history — cards on mobile, table on desktop */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100">
+        <div className="px-4 sm:px-5 py-4 border-b border-slate-100">
           <h2 className="font-semibold text-slate-800 text-sm">Historial de pedidos</h2>
         </div>
-        <div className="overflow-x-auto">
+
+        {orders.length === 0 && (
+          <div className="text-center py-10 text-slate-400 text-sm px-4">
+            Aún no tienes pedidos.{" "}
+            <Link href="/portal/orders/new" className="text-teal-600 font-medium">
+              Crear tu primer pedido
+            </Link>
+          </div>
+        )}
+
+        {/* Mobile: card list */}
+        <div className="sm:hidden divide-y divide-slate-100">
+          {orders.map((order) => (
+            <Link
+              key={order.id}
+              href={`/portal/orders/${order.id}`}
+              className="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-800">{order.orderNumber}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{formatDate(order.createdAt)}</p>
+                <div className="mt-1">
+                  <StatusBadge status={order.status as OrderStatus} />
+                </div>
+              </div>
+              <div className="text-right shrink-0 ml-3">
+                <p className="text-sm font-semibold text-slate-700">{formatCurrency(order.totalAmount)}</p>
+                <p className="text-xs text-teal-600 mt-1">Ver →</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
@@ -86,16 +121,6 @@ export default async function PortalPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-400 text-sm">
-                    Aún no tienes pedidos.{" "}
-                    <Link href="/portal/orders/new" className="text-teal-600 font-medium">
-                      Crear tu primer pedido
-                    </Link>
-                  </td>
-                </tr>
-              )}
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-slate-50 transition">
                   <td className="px-4 py-3 font-medium text-slate-800">{order.orderNumber}</td>

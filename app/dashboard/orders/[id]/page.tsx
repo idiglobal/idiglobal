@@ -35,7 +35,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   ]
 
   return (
-    <div className="p-6 space-y-5 max-w-5xl">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-w-5xl">
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard/orders"
@@ -60,7 +60,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <StatusPipeline currentStatus={order.status as OrderStatus} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Left column */}
         <div className="lg:col-span-2 space-y-5">
           {/* Items */}

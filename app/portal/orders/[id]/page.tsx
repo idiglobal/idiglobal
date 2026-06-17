@@ -23,16 +23,16 @@ export default async function ClientOrderPage({ params }: { params: Promise<{ id
   if (order.clientId !== clientId) redirect("/portal")
 
   return (
-    <div className="p-6 space-y-5 max-w-3xl">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-w-3xl">
       <div className="flex items-center gap-3">
-        <Link href="/portal" className="p-1.5 hover:bg-slate-100 rounded-lg transition">
+        <Link href="/portal" className="p-1.5 hover:bg-slate-100 rounded-lg transition shrink-0">
           <ArrowLeft size={16} className="text-slate-500" />
         </Link>
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">{order.orderNumber}</h1>
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 truncate">{order.orderNumber}</h1>
           <p className="text-sm text-slate-500">{formatDate(order.createdAt)}</p>
         </div>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3 shrink-0">
           <StatusBadge status={order.status as OrderStatus} />
           <ClientOrderPDF order={{
             orderNumber: order.orderNumber,

@@ -69,14 +69,14 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">Resumen</h1>
         <p className="text-sm text-slate-500 mt-0.5">Vista general del negocio</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-start justify-between">
@@ -93,7 +93,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Extra stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {(
           [
             "QUOTE_SENT",
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Recent orders */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">

@@ -14,38 +14,39 @@ export function StatusPipeline({ currentStatus }: { currentStatus: OrderStatus }
   const currentIndex = STATUS_PIPELINE.indexOf(currentStatus)
 
   return (
-    <div className="flex items-center gap-0 overflow-x-auto pb-1">
-      {STATUS_PIPELINE.map((status, index) => {
-        const isDone = index < currentIndex
-        const isCurrent = index === currentIndex
-        const isPending = index > currentIndex
+    <div className="overflow-x-auto -mx-1 px-1 pb-1">
+      <div className="flex items-center gap-0 min-w-max">
+        {STATUS_PIPELINE.map((status, index) => {
+          const isDone = index < currentIndex
+          const isCurrent = index === currentIndex
 
-        return (
-          <div key={status} className="flex items-center">
-            <div className="flex flex-col items-center gap-1.5 min-w-0">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0 transition-all ${
-                isDone
-                  ? "bg-teal-600 border-teal-600 text-white"
-                  : isCurrent
-                  ? "bg-white border-teal-600 text-teal-600"
-                  : "bg-white border-slate-200 text-slate-400"
-              }`}>
-                {isDone ? "✓" : index + 1}
+          return (
+            <div key={status} className="flex items-center">
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0 transition-all ${
+                  isDone
+                    ? "bg-teal-600 border-teal-600 text-white"
+                    : isCurrent
+                    ? "bg-white border-teal-600 text-teal-600"
+                    : "bg-white border-slate-200 text-slate-400"
+                }`}>
+                  {isDone ? "✓" : index + 1}
+                </div>
+                <span className={`text-xs whitespace-nowrap font-medium ${
+                  isDone ? "text-teal-600" : isCurrent ? "text-slate-800" : "text-slate-400"
+                }`}>
+                  {STATUS_LABELS[status]}
+                </span>
               </div>
-              <span className={`text-xs whitespace-nowrap font-medium ${
-                isDone ? "text-teal-600" : isCurrent ? "text-slate-800" : "text-slate-400"
-              }`}>
-                {STATUS_LABELS[status]}
-              </span>
+              {index < STATUS_PIPELINE.length - 1 && (
+                <div className={`h-0.5 w-6 sm:w-8 mx-1 shrink-0 mb-5 ${
+                  index < currentIndex ? "bg-teal-600" : "bg-slate-200"
+                }`} />
+              )}
             </div>
-            {index < STATUS_PIPELINE.length - 1 && (
-              <div className={`h-0.5 w-8 mx-1 shrink-0 mb-5 ${
-                index < currentIndex ? "bg-teal-600" : "bg-slate-200"
-              }`} />
-            )}
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

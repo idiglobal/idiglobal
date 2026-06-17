@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { ClientSidebar } from "@/components/client/ClientSidebar"
+import { PortalShell } from "@/components/client/PortalShell"
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -14,9 +14,8 @@ export default async function PortalLayout({ children }: { children: React.React
     : null
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <ClientSidebar companyName={client?.companyName ?? "Cliente"} />
-      <main className="flex-1 overflow-y-auto">{children}</main>
-    </div>
+    <PortalShell companyName={client?.companyName ?? "Cliente"}>
+      {children}
+    </PortalShell>
   )
 }
