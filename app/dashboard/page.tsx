@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { formatCurrency, formatDate, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils"
 import { OrderStatus } from "@/app/generated/prisma/client"
 import Link from "next/link"
-import { ShoppingBag, Clock, Factory, TrendingUp, Users, Truck } from "lucide-react"
+import { ShoppingBag, Clock, Factory, TrendingUp, DollarSign, Users, Truck } from "lucide-react"
 import { StatusBadge } from "@/components/ui/Badge"
 
 export default async function DashboardPage() {
@@ -16,10 +16,14 @@ export default async function DashboardPage() {
     prisma.supplier.count(),
   ])
 
-  const allOrders = await prisma.order.findMany()
-  const totalRevenue = allOrders
-    .filter((o) => o.status !== "CANCELLED")
-    .reduce((sum, o) => sum + o.totalAmount, 0)
+  const allOrders = await prisma.order.findMany({ include: { expenses: true } })
+  const activeOrders = allOrders.filter((o) => o.status !== "CANCELLED")
+  const totalRevenue = activeOrders.reduce((sum, o) => sum + o.totalAmount, 0)
+  const totalExpenses = activeOrders.reduce(
+    (sum, o) => sum + o.expenses.reduce((s, e) => s + e.amount, 0),
+    0
+  )
+  const totalProfit = totalRevenue - totalExpenses
 
   const byStatus = allOrders.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1
@@ -55,6 +59,13 @@ export default async function DashboardPage() {
       color: "text-teal-600",
       bg: "bg-teal-50",
     },
+    {
+      label: "Beneficio neto",
+      value: formatCurrency(totalProfit),
+      icon: DollarSign,
+      color: totalProfit >= 0 ? "text-green-600" : "text-red-600",
+      bg: totalProfit >= 0 ? "bg-green-50" : "bg-red-50",
+    },
   ]
 
   return (
@@ -65,7 +76,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-start justify-between">

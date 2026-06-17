@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma"
-import { formatCurrency, formatDate, STATUS_LABELS } from "@/lib/utils"
+import { STATUS_LABELS } from "@/lib/utils"
 import { OrderStatus } from "@/app/generated/prisma/client"
 import Link from "next/link"
 import { Plus } from "lucide-react"
-import { OrderTableActions } from "@/components/admin/OrderTableActions"
-import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect"
+import { OrdersTable } from "@/components/admin/OrdersTable"
 
 export default async function OrdersPage({
   searchParams,
@@ -27,7 +26,7 @@ export default async function OrdersPage({
           }
         : {}),
     },
-    include: { client: true, supplier: true },
+    include: { client: true, supplier: true, expenses: true },
     orderBy: { createdAt: "desc" },
   })
 
@@ -104,58 +103,7 @@ export default async function OrdersPage({
         </a>
       </form>
 
-      {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Pedido</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Cliente</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Estado</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Proveedor</th>
-                <th className="text-right px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Importe</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500 text-xs uppercase tracking-wide">Fecha</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-400 text-sm">
-                    No se encontraron pedidos
-                  </td>
-                </tr>
-              )}
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-slate-50 transition">
-                  <td className="px-4 py-3 font-medium text-slate-800">{order.orderNumber}</td>
-                  <td className="px-4 py-3 text-slate-600">{order.client.companyName}</td>
-                  <td className="px-4 py-3">
-                    <OrderStatusSelect orderId={order.id} currentStatus={order.status as OrderStatus} />
-                  </td>
-                  <td className="px-4 py-3 text-slate-500">{order.supplier?.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-slate-700">
-                    {formatCurrency(order.totalAmount)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-400">{formatDate(order.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 justify-end">
-                      <Link
-                        href={`/dashboard/orders/${order.id}`}
-                        className="text-teal-600 hover:text-teal-700 text-xs font-medium"
-                      >
-                        Ver →
-                      </Link>
-                      <OrderTableActions orderId={order.id} orderNumber={order.orderNumber} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <OrdersTable orders={orders} />
     </div>
   )
 }
