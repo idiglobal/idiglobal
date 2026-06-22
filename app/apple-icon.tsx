@@ -7,39 +7,37 @@ export default function AppleIcon() {
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)",
+        background: "linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "4px",
+        gap: "0px",
       }}
     >
       <span
         style={{
           color: "white",
-          fontWeight: 800,
-          fontSize: 72,
-          fontFamily: "sans-serif",
-          letterSpacing: "-2px",
+          fontWeight: 700,
+          fontSize: 88,
+          fontFamily: "Arial, sans-serif",
+          letterSpacing: "-3px",
           lineHeight: 1,
+          marginBottom: "6px",
         }}
       >
         IG
       </span>
-      <span
+      <div
         style={{
-          color: "rgba(255,255,255,0.75)",
-          fontSize: 14,
-          fontFamily: "sans-serif",
-          fontWeight: 500,
-          letterSpacing: "1px",
+          width: 70,
+          height: 4,
+          background: "#0d9488",
+          borderRadius: 2,
         }}
-      >
-        IDENTIKGLOBAL
-      </span>
+      />
     </div>,
     { ...size }
   )

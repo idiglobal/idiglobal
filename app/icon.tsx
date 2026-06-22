@@ -7,7 +7,7 @@ export default function Icon() {
   return new ImageResponse(
     <div
       style={{
-        background: "#0f766e",
+        background: "linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -16,7 +16,15 @@ export default function Icon() {
         borderRadius: "6px",
       }}
     >
-      <span style={{ color: "white", fontWeight: 700, fontSize: 14, fontFamily: "sans-serif" }}>
+      <span
+        style={{
+          color: "white",
+          fontWeight: 700,
+          fontSize: 14,
+          fontFamily: "Arial, sans-serif",
+          letterSpacing: "-0.5px",
+        }}
+      >
         IG
       </span>
     </div>,
