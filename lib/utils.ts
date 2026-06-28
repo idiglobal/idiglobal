@@ -20,7 +20,7 @@ export function generateOrderNumber(year: number, sequence: number): string {
 }
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
-  QUOTE_SENT: "Presupuesto enviado",
+  QUOTE_SENT: "Presupuesto por hacer",
   CONFIRMED: "Confirmado",
   IN_PRODUCTION: "En producción",
   SHIPPED: "Enviado",
