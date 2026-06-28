@@ -127,6 +127,7 @@ enum Role {
 
 enum OrderStatus {
   QUOTE_SENT
+  BUDGET_SENT
   CONFIRMED
   IN_PRODUCTION
   SHIPPED

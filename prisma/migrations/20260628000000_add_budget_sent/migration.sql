@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "OrderStatus" ADD VALUE 'BUDGET_SENT' AFTER 'QUOTE_SENT';
