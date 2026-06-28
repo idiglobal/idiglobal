@@ -27,6 +27,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const suppliers = await prisma.supplier.findMany({ orderBy: { name: "asc" } })
   const statuses: OrderStatus[] = [
     "QUOTE_SENT",
+    "BUDGET_SENT",
     "CONFIRMED",
     "IN_PRODUCTION",
     "SHIPPED",
