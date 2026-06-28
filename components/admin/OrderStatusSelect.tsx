@@ -8,6 +8,7 @@ import { Check, Loader2 } from "lucide-react"
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   QUOTE_SENT:    "bg-slate-100 text-slate-600 border-slate-200",
+  BUDGET_SENT:   "bg-orange-50 text-orange-700 border-orange-200",
   CONFIRMED:     "bg-blue-50 text-blue-700 border-blue-200",
   IN_PRODUCTION: "bg-amber-50 text-amber-700 border-amber-200",
   SHIPPED:       "bg-purple-50 text-purple-700 border-purple-200",
@@ -17,6 +18,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 
 const ALL_STATUSES: OrderStatus[] = [
   "QUOTE_SENT",
+  "BUDGET_SENT",
   "CONFIRMED",
   "IN_PRODUCTION",
   "SHIPPED",
