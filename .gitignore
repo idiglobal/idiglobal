@@ -54,3 +54,4 @@ scripts/contact-sheets/
 
 # Imagenes fuente de mockups (subidas a Vercel Blob por scripts/import-mockups.ts)
 fotosweb/
+web wordpress local/

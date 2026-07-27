@@ -7,13 +7,12 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function OPTIONS() {
   return new NextResponse(null, { headers: CORS })
 }
 
 export async function POST(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const { orderNumber, companyName, contactName, email, phone, items, technique, designDescription, fileUrls } = await req.json()
 
   if (!orderNumber || !companyName || !email) {

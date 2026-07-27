@@ -10,6 +10,7 @@ import {
   Truck,
   FileText,
   Package,
+  Radar,
   LogOut,
   X,
 } from "lucide-react"
@@ -21,6 +22,7 @@ const links = [
   { href: "/dashboard/clients", label: "Clientes", icon: Users },
   { href: "/dashboard/suppliers", label: "Proveedores", icon: Truck },
   { href: "/dashboard/quotes", label: "Presupuestos", icon: FileText },
+  { href: "/dashboard/prospeccion", label: "Prospección", icon: Radar },
 ]
 
 export function AdminSidebar({ onClose }: { onClose?: () => void }) {

@@ -121,6 +121,76 @@ model OrderExpense {
   createdAt DateTime @default(now())
 }
 
+// ─── Prospección B2B ─────────────────────────────────────────────────────────
+// Tablas compartidas con el worker Python (idiglobal-worker) vía SQLAlchemy:
+// los nombres snake_case de tabla/columna son un contrato — no renombrar.
+
+model ProspectLead {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(255)
+  category        String?   @db.VarChar(255)
+  address         String?   @db.VarChar(500)
+  city            String?   @db.VarChar(120)
+  phone           String?   @db.VarChar(60)
+  website         String?   @db.VarChar(500)
+  rating          Float?
+  reviewsCount    Int?      @map("reviews_count")
+  searchKeyword   String?   @map("search_keyword") @db.VarChar(255)
+  segment         String    @default("eventos") @db.VarChar(20)
+  intentScore     Int       @default(0) @map("intent_score")
+  intentSignals   String?   @map("intent_signals")
+  email           String?   @db.VarChar(255)
+  contactName     String?   @map("contact_name") @db.VarChar(255)
+  enrichmentNotes String?   @map("enrichment_notes")
+  emailStatus     String    @default("no_verificado") @map("email_status") @db.VarChar(20)
+  emailCheckedAt  DateTime? @map("email_checked_at")
+  emailSubject    String?   @map("email_subject") @db.VarChar(500)
+  emailBody       String?   @map("email_body")
+  status          String    @default("nuevo") @db.VarChar(40)
+  lastSentAt      DateTime? @map("last_sent_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([name, address], map: "uq_prospect_lead_name_address")
+  @@map("prospect_leads")
+}
+
+model ProspectJob {
+  id         Int       @id @default(autoincrement())
+  type       String    @db.VarChar(20) // scrape|scrape_intent|enrich|filter|verify|generate|send
+  params     Json?
+  status     String    @default("pending") @db.VarChar(10) // pending|running|done|error
+  log        String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+
+  @@map("prospect_jobs")
+}
+
+model ProspectSendLog {
+  id           Int      @id @default(autoincrement())
+  leadId       Int      @map("lead_id")
+  emailTo      String   @map("email_to") @db.VarChar(255)
+  subject      String?  @db.VarChar(500)
+  success      Boolean  @default(false)
+  errorMessage String?  @map("error_message")
+  sentAt       DateTime @default(now()) @map("sent_at")
+  sendDate     DateTime @default(dbgenerated("CURRENT_DATE")) @map("send_date") @db.Date
+
+  @@map("prospect_send_logs")
+}
+
+model ProspectSuppression {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  reason    String   @default("manual") @db.VarChar(20) // baja|rebote|queja|manual
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("prospect_suppressions")
+}
+
 enum Role {
   ADMIN
   CLIENT
