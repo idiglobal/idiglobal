@@ -62,6 +62,7 @@ model Product {
   minQuantity Int         @default(1)
   available   Boolean     @default(true)
   imageUrl    String?
+  gallery     String?
   orderItems  OrderItem[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

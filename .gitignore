@@ -45,3 +45,9 @@ next-env.d.ts
 # sqlite dev db
 dev.db
 *.db-journal
+
+.vercel
+.env*
+
+# Hojas de contactos generadas por scripts/build-contact-sheets.mjs
+scripts/contact-sheets/

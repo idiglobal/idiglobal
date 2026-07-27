@@ -40,6 +40,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           minQuantity: product.minQuantity,
           available: product.available,
           imageUrl: product.imageUrl ?? "",
+          gallery: product.gallery ?? undefined,
         }}
       />
     </div>

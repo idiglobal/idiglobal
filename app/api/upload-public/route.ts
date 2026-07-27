@@ -23,11 +23,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "El archivo supera los 30 MB" }, { status: 400, headers: CORS })
   }
 
-  const timestamp = Date.now()
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
-  const pathname = `quotes/${timestamp}-${safeName}`
 
-  const blob = await put(pathname, file, { access: "public" })
+  // Carpeta opcional; se sanea a un slug plano para que no pueda escaparse
+  // del prefijo (nada de "..", barras ni rutas absolutas).
+  const rawFolder = formData.get("folder")
+  const folder =
+    typeof rawFolder === "string"
+      ? rawFolder.replace(/[^a-zA-Z0-9/_-]/g, "").replace(/\.+/g, "").replace(/^\/+|\/+$/g, "")
+      : ""
+
+  // Dentro de una carpeta explícita el nombre debe ser estable (reimportable);
+  // en subidas anónimas se antepone timestamp para no pisar nada.
+  const pathname = folder
+    ? `${folder}/${safeName}`
+    : `quotes/${Date.now()}-${safeName}`
+
+  const blob = await put(pathname, file, {
+    access: "public",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+  })
 
   return NextResponse.json({ url: blob.url, name: file.name, size: file.size }, { headers: CORS })
 }
