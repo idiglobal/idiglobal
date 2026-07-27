@@ -10,14 +10,21 @@
 // .env.vercel trae BLOB_STORE_ID + VERCEL_OIDC_TOKEN (el Blob de este proyecto
 // usa OIDC, no BLOB_READ_WRITE_TOKEN). Generarlo con:
 //   vercel env pull .env.vercel --environment=production
+// OJO: sin override. .env.vercel trae DATABASE_URL="" (variable gestionada
+// por la integracion de Vercel, vacia al hacer pull) y pisaria la buena de .env.
 import { config } from "dotenv"
 config({ path: ".env" })
-config({ path: ".env.vercel", override: true })
+config({ path: ".env.vercel" })
 
 import { PrismaClient } from "../app/generated/prisma/client.js"
 import { PrismaNeon } from "@prisma/adapter-neon"
+import { neonConfig } from "@neondatabase/serverless"
 import { readFileSync, readdirSync, existsSync } from "node:fs"
 import { join } from "node:path"
+
+// El driver Neon usa WebSockets por defecto, que algunas redes/firewalls
+// bloquean en salida. Para un script puntual va mejor por HTTP/fetch.
+neonConfig.poolQueryViaFetch = true
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter } as ConstructorParameters<typeof PrismaClient>[0])
@@ -180,9 +187,13 @@ async function main() {
   }
 }
 
+process.on("unhandledRejection", (e) => {
+  console.error("unhandledRejection:", e instanceof Error ? e.stack : e)
+})
+
 main()
   .catch((e) => {
-    console.error(e)
+    console.error(e instanceof Error ? e.stack : e)
     process.exit(1)
   })
   .finally(() => prisma.$disconnect())

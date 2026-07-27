@@ -51,3 +51,6 @@ dev.db
 
 # Hojas de contactos generadas por scripts/build-contact-sheets.mjs
 scripts/contact-sheets/
+
+# Imagenes fuente de mockups (subidas a Vercel Blob por scripts/import-mockups.ts)
+fotosweb/
