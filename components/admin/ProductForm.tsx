@@ -21,6 +21,7 @@ type ProductFormProps = {
     minQuantity?: number
     available?: boolean
     imageUrl?: string
+    gallery?: string
   }
   mode: "new" | "edit"
 }
@@ -267,6 +268,23 @@ export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps)
               onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f) }} />
           </div>
         )}
+
+        {initial.gallery && (() => {
+          let extra: string[] = []
+          try { extra = JSON.parse(initial.gallery!) } catch { /* ignore */ }
+          if (extra.length === 0) return null
+          return (
+            <div className="pt-2">
+              <p className="text-xs font-medium text-slate-600 mb-2">Otras vistas</p>
+              <div className="flex gap-2">
+                {extra.map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={url} src={url} alt="vista adicional" className="h-20 w-20 object-cover rounded-lg border border-slate-200" />
+                ))}
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Availability */}
