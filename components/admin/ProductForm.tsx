@@ -13,6 +13,7 @@ type ProductFormProps = {
     reference?: string
     name?: string
     description?: string
+    collection?: string
     category?: string
     unitPrice?: number
     supplierId?: string
@@ -31,6 +32,11 @@ const CATEGORIES = [
   "Camisetas", "Polos", "Sudaderas", "Hoodies", "Chaquetas",
   "Pantalones", "Uniformes", "Ropa técnica", "Accesorios", "Otro",
 ]
+// Apartado con el que se agrupa en la web pública
+const COLLECTIONS = [
+  "Diseños de coches",
+  "Sudaderas para grupos y colegios",
+]
 
 export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps) {
   const router = useRouter()
@@ -40,6 +46,7 @@ export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps)
     reference: initial.reference ?? "",
     name: initial.name ?? "",
     description: initial.description ?? "",
+    collection: initial.collection ?? "",
     category: initial.category ?? "",
     unitPrice: initial.unitPrice ?? 0,
     supplierId: initial.supplierId ?? "",
@@ -97,8 +104,9 @@ export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps)
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.reference || !form.name || form.unitPrice <= 0) {
-      setError("Referencia, nombre y precio son obligatorios")
+    // El precio 0 es valido a proposito: marca el producto como "solo presupuesto"
+    if (!form.reference || !form.name || Number(form.unitPrice) < 0 || Number.isNaN(Number(form.unitPrice))) {
+      setError("Referencia y nombre son obligatorios, y el precio no puede ser negativo")
       return
     }
     setSaving(true)
@@ -109,6 +117,7 @@ export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps)
       unitPrice: Number(form.unitPrice),
       minQuantity: Number(form.minQuantity),
       supplierId: form.supplierId || null,
+      collection: form.collection || null,
       colors: selectedColors.length ? JSON.stringify(selectedColors) : null,
       sizes: selectedSizes.length ? JSON.stringify(selectedSizes) : null,
       imageUrl: form.imageUrl || null,
@@ -153,6 +162,19 @@ export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps)
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-slate-600 mb-1 block">Apartado en la web</label>
+          <select value={form.collection} onChange={(e) => set("collection", e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+            <option value="">Sin apartado</option>
+            {COLLECTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <p className="text-xs text-slate-400 mt-1">
+            Agrupa el producto en los filtros de la web. Si lo dejas con precio 0, se mostrará como
+            &quot;Pedir presupuesto&quot; en vez de comprar online.
+          </p>
         </div>
 
         <div>

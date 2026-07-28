@@ -53,6 +53,7 @@ model Product {
   reference   String      @unique
   name        String
   description String?
+  collection  String?
   category    String?
   unitPrice   Float
   supplierId  String?

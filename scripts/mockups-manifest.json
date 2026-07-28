@@ -2,7 +2,7 @@
   "_comment": "Nombre real de cada diseño, identificado leyendo el estampado. Los slugs de carpeta NO son fiables (15-1 = Aston Martin DB9, 7-2 = Lamborghini Aventador). Edita 'name' si quieres cambiar como aparece en el catalogo.",
   "precios": {
     "camiseta": 20,
-    "sudadera": 40
+    "sudadera": 35
   },
   "modelos": [
     { "slug": "15-1", "name": "Aston Martin DB9", "marca": "Aston Martin" },

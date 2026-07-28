@@ -19,12 +19,13 @@ export async function GET() {
       id: true,
       name: true,
       description: true,
+      collection: true,
       category: true,
       unitPrice: true,
       minQuantity: true,
       imageUrl: true,
     },
-    orderBy: [{ category: "asc" }, { name: "asc" }],
+    orderBy: [{ collection: "asc" }, { category: "asc" }, { name: "asc" }],
   })
   return NextResponse.json(products, { headers: CORS })
 }
