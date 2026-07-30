@@ -35,7 +35,7 @@ const CATEGORIES = [
 // Apartado con el que se agrupa en la web pública
 const COLLECTIONS = [
   "Diseños de coches",
-  "Sudaderas para grupos y colegios",
+  "Grupos, colegios y equipos",
 ]
 
 export function ProductForm({ suppliers, initial = {}, mode }: ProductFormProps) {

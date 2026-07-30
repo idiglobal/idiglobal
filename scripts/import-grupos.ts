@@ -27,7 +27,9 @@ const prisma = new PrismaClient({ adapter } as ConstructorParameters<typeof Pris
 const SRC = "fotosweb/grupos-ejemplos"
 const DRY = process.argv.includes("--dry-run")
 
-const COLLECTION = "Sudaderas para grupos y colegios"
+const COLLECTION = "Grupos, colegios y equipos"
+// Nombre anterior; se renombra en sitio para no duplicar productos
+const COLLECTION_ANTERIOR = "Sudaderas para grupos y colegios"
 const SIZES = JSON.stringify(["XS", "S", "M", "L", "XL", "XXL"])
 
 const UPLOAD_ENDPOINT = `${process.env.IMPORT_BASE_URL ?? "https://idiglobal.vercel.app"}/api/upload-public`
@@ -68,6 +70,39 @@ const EJEMPLOS = [
     description:
       "Estampado pequeño en el pecho y diseño grande en la espalda, la combinación más pedida para promociones.",
   },
+  // Equipaciones deportivas
+  {
+    file: "equipacion-completa.jpg",
+    reference: "GRP-EQUIPACION-COMPLETA",
+    name: "Equipación de fútbol completa",
+    description:
+      "Camiseta, pantalón y medias a juego, con dorsal, nombre y escudo del equipo. Para clubes, peñas o partidos entre amigos.",
+    categoria: "Ropa técnica",
+  },
+  {
+    file: "equipacion-equipo.jpg",
+    reference: "GRP-EQUIPACION-EQUIPO",
+    name: "Equipaciones para equipo o grupo de amigos",
+    description:
+      "Juego completo de equipaciones personalizadas para toda la plantilla, cada una con su dorsal y su nombre.",
+    categoria: "Ropa técnica",
+  },
+  {
+    file: "chandal-entrenamiento.jpg",
+    reference: "GRP-CHANDAL",
+    name: "Chándal de entrenamiento personalizado",
+    description:
+      "Chaqueta y pantalón técnicos con el escudo y los colores del club. Ideal para calentamiento y desplazamientos.",
+    categoria: "Ropa técnica",
+  },
+  {
+    file: "equipacion-dorsal.jpg",
+    reference: "GRP-EQUIPACION-DORSAL",
+    name: "Camiseta de juego con dorsal y nombre",
+    description:
+      "Tejido técnico transpirable con dorsal y apellido estampados. Se puede pedir suelta o dentro de la equipación completa.",
+    categoria: "Ropa técnica",
+  },
 ]
 
 async function upload(localPath: string, folder: string, fileName: string) {
@@ -91,6 +126,16 @@ async function upload(localPath: string, folder: string, fileName: string) {
 }
 
 async function main() {
+  // Renombrado en sitio del apartado: los 5 productos que ya existian pasan
+  // al nombre nuevo sin duplicarse.
+  if (!DRY) {
+    const movidos = await prisma.product.updateMany({
+      where: { collection: COLLECTION_ANTERIOR },
+      data: { collection: COLLECTION },
+    })
+    if (movidos.count) console.log(`renombrado el apartado en ${movidos.count} productos existentes\n`)
+  }
+
   for (const e of EJEMPLOS) {
     const path = join(SRC, e.file)
     if (!existsSync(path)) {
@@ -107,7 +152,8 @@ async function main() {
       name: e.name,
       description: e.description,
       collection: COLLECTION,
-      category: "Sudaderas",
+      // Las equipaciones traen su propia categoria; el resto son sudaderas
+      category: ("categoria" in e ? e.categoria : undefined) ?? "Sudaderas",
       unitPrice: 0,
       sizes: SIZES,
       imageUrl,
