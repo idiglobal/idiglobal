@@ -12,6 +12,8 @@ import {
   JOB_STATUS_LABELS,
   MAX_SCRAPE_LIMIT,
   MAX_LEAD_IDS,
+  CAMPANA_SEPTIEMBRE,
+  CAMPANA_SEPTIEMBRE_LABEL,
   esEnviable,
   leadOrigin,
   leadSignals,
@@ -37,6 +39,7 @@ import {
   Clock,
   AlertTriangle,
   X,
+  GraduationCap,
 } from "lucide-react"
 
 type Lead = {
@@ -57,6 +60,7 @@ type Lead = {
   emailBody: string | null
   searchKeyword: string | null
   status: string
+  campaign: string | null
   createdAt: string
 }
 
@@ -93,7 +97,7 @@ export function ProspeccionPanel({
   initialJobs: Job[]
   quota: Quota
 }) {
-  const [tab, setTab] = useState<"pipeline" | "ultra" | "acciones">("pipeline")
+  const [tab, setTab] = useState<"pipeline" | "ultra" | "campana" | "acciones">("pipeline")
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [refreshing, setRefreshing] = useState(false)
@@ -152,12 +156,26 @@ export function ProspeccionPanel({
     return () => clearInterval(t)
   }, [hasActiveJobs, refresh])
 
+  // Los leads de Campaña Septiembre (colegios/AMPAs y equipos deportivos, en
+  // pausa mientras los colegios están cerrados) se apartan del pipeline
+  // activo y de ultracualificados: aquí solo se ve lo que se puede contactar
+  // ya. El worker ya excluye esta campaña del envío general por su cuenta,
+  // pero conviene que tampoco aparezcan mezclados para seleccionar a mano.
+  const leadsActivos = useMemo(
+    () => leads.filter((l) => l.campaign !== CAMPANA_SEPTIEMBRE),
+    [leads]
+  )
+  const leadsCampana = useMemo(
+    () => leads.filter((l) => l.campaign === CAMPANA_SEPTIEMBRE),
+    [leads]
+  )
+
   const ultra = useMemo(
     () =>
-      leads
+      leadsActivos
         .filter((l) => l.intentScore >= 4 && l.status !== "descartado")
         .sort((a, b) => b.intentScore - a.intentScore),
-    [leads]
+    [leadsActivos]
   )
 
   // La selección puede quedar obsoleta tras un refresco (un lead pasa a
@@ -197,6 +215,7 @@ export function ProspeccionPanel({
   const tabs = [
     { id: "pipeline" as const, label: "Pipeline", icon: ListChecks },
     { id: "ultra" as const, label: `Ultracualificados (${ultra.length})`, icon: Flame },
+    { id: "campana" as const, label: `${CAMPANA_SEPTIEMBRE_LABEL} (${leadsCampana.length})`, icon: GraduationCap },
     { id: "acciones" as const, label: "Acciones", icon: Play },
   ]
 
@@ -244,7 +263,7 @@ export function ProspeccionPanel({
 
       {tab === "pipeline" && (
         <PipelineTab
-          leads={leads}
+          leads={leadsActivos}
           seleccion={seleccion}
           seleccionados={seleccionados}
           enviables={enviables}
@@ -267,6 +286,7 @@ export function ProspeccionPanel({
           onSeleccionarUltra={seleccionarUltra}
         />
       )}
+      {tab === "campana" && <CampanaSeptiembreTab leads={leadsCampana} onChanged={refresh} />}
       {tab === "acciones" && (
         <AccionesTab jobs={jobs} quota={quota} busy={busy} createJob={createJob} />
       )}
@@ -561,6 +581,7 @@ function LeadRow({
   onAlternar,
   onToggle,
   onChanged,
+  permitirSeleccion = true,
 }: {
   lead: Lead
   marcado: boolean
@@ -568,10 +589,12 @@ function LeadRow({
   onAlternar: () => void
   onToggle: () => void
   onChanged: () => void
+  /** false en contextos sin selección (p. ej. Campaña Septiembre): nunca muestra el checkbox. */
+  permitirSeleccion?: boolean
 }) {
   const [busy, setBusy] = useState(false)
   const signals = leadSignals(lead.intentSignals)
-  const seleccionable = esSeleccionable(lead)
+  const seleccionable = permitirSeleccion && esSeleccionable(lead)
   const enviable = esEnviable(lead)
 
   async function setStatus(status: string) {
@@ -841,6 +864,118 @@ function UltraTab({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+/* ─── Campaña Septiembre ───────────────────────────────────────────────── */
+
+function CampanaSeptiembreTab({ leads, onChanged }: { leads: Lead[]; onChanged: () => void }) {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [q, setQ] = useState("")
+  const [openLead, setOpenLead] = useState<number | null>(null)
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = {}
+    for (const l of leads) c[l.status] = (c[l.status] ?? 0) + 1
+    return c
+  }, [leads])
+
+  const filtered = useMemo(
+    () =>
+      leads.filter((l) => {
+        if (statusFilter && l.status !== statusFilter) return false
+        if (q) {
+          const needle = q.toLowerCase()
+          const hay = `${l.name} ${l.email ?? ""} ${l.category ?? ""} ${l.city ?? ""}`.toLowerCase()
+          if (!hay.includes(needle)) return false
+        }
+        return true
+      }),
+    [leads, statusFilter, q]
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+        <GraduationCap size={18} className="text-amber-600 shrink-0 mt-0.5" />
+        <p className="text-sm text-amber-900 leading-relaxed">
+          Colegios/AMPAs y equipos deportivos, aparte del pipeline activo: ahora mismo están
+          cerrados y no interesa escribirles. Se siguen buscando y guardando aquí para tener
+          el terreno abonado — el envío general nunca los toca, ni aparecen en Ultracualificados.
+          Cuando llegue septiembre, se pueden trabajar desde aquí como cualquier otro lead.
+        </p>
+      </div>
+
+      {leads.length === 0 ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-10 text-center">
+          <GraduationCap size={32} className="mx-auto mb-3 text-slate-200" />
+          <p className="text-sm text-slate-400">
+            Aún no hay leads en esta campaña. Aparecerán aquí solos cuando la búsqueda diaria
+            (o la campaña de colegios) encuentre un colegio, AMPA o equipo deportivo.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setStatusFilter(null)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                statusFilter === null
+                  ? "bg-slate-800 text-white border-slate-800"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+              }`}
+            >
+              Todos ({leads.length})
+            </button>
+            {LEAD_STATUSES.filter((s) => counts[s]).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(statusFilter === s ? null : s)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                  statusFilter === s
+                    ? "bg-teal-600 text-white border-teal-600"
+                    : `${LEAD_STATUS_COLORS[s as LeadStatus]} border-transparent hover:opacity-80`
+                }`}
+              >
+                {LEAD_STATUS_LABELS[s as LeadStatus]} ({counts[s]})
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar centro, club, email o ciudad…"
+              className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            {filtered.length === 0 && (
+              <p className="text-center py-10 text-sm text-slate-400">
+                Ningún lead de la campaña coincide con el filtro.
+              </p>
+            )}
+            <div className="divide-y divide-slate-50">
+              {filtered.map((lead) => (
+                <LeadRow
+                  key={lead.id}
+                  lead={lead}
+                  marcado={false}
+                  open={openLead === lead.id}
+                  onAlternar={() => {}}
+                  onToggle={() => setOpenLead(openLead === lead.id ? null : lead.id)}
+                  onChanged={onChanged}
+                  permitirSeleccion={false}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

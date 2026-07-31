@@ -152,6 +152,12 @@ model ProspectLead {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
+  // Campaña temporal a la que pertenece el lead (p. ej. "septiembre" para
+  // colegios/AMPAs y equipos deportivos, en pausa mientras están cerrados).
+  // null = pipeline activo normal. El worker la asigna al crear el lead
+  // según la keyword de búsqueda; ver idiglobal-worker/campanas.py.
+  campaign        String?   @db.VarChar(40)
+
   @@unique([name, address], map: "uq_prospect_lead_name_address")
   @@map("prospect_leads")
 }

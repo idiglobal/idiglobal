@@ -188,6 +188,15 @@ export function leadSignals(intentSignals: string | null) {
 export const MAX_EMAILS_PER_DAY = 50
 export const MAX_SCRAPE_LIMIT = 25
 
+/**
+ * Campaña temporal: colegios/AMPAs y equipos deportivos, en pausa mientras
+ * los colegios están cerrados. El worker asigna esta etiqueta al crear el
+ * lead según la keyword de búsqueda (ver idiglobal-worker/campanas.py) y
+ * excluye estos leads del envío general por defecto.
+ */
+export const CAMPANA_SEPTIEMBRE = "septiembre"
+export const CAMPANA_SEPTIEMBRE_LABEL = "Campaña Septiembre"
+
 /** Tope de leads por envío selectivo. Espejo del límite validado en la API. */
 export const MAX_LEAD_IDS = 200
 
