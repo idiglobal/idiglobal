@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { SEGMENTS, MAX_SCRAPE_LIMIT } from "@/lib/prospeccion"
+import { SEGMENTS, MAX_SCRAPE_LIMIT, normalizarLeadIds } from "@/lib/prospeccion"
 import type { Prisma } from "@/app/generated/prisma/client"
 
 async function requireAdmin() {
@@ -66,19 +66,65 @@ export async function POST(req: NextRequest) {
     p.limit = Math.min(Math.max(1, Number(p.limit) || 15), MAX_SCRAPE_LIMIT)
   }
 
-  // Evitar duplicados exactos en cola
-  const existing = await prisma.prospectJob.findFirst({
+  // Validación del envío selectivo (ver CONTRATO_ENVIO_SELECTIVO.md).
+  //
+  // El worker interpreta "leadIds presente pero vacío" como "no enviar a nadie",
+  // deliberadamente. Aquí cortamos antes: si la selección no deja ningún id
+  // válido devolvemos 400 y no creamos el job, en vez de encolar uno que no
+  // haría nada. La clave solo viaja si tiene contenido.
+  let leadIdsLimpios: number[] | null = null
+  if (type === "send") {
+    const bruto = (params ?? {} as Record<string, unknown>).leadIds
+
+    if (bruto !== undefined && bruto !== null) {
+      const r = normalizarLeadIds(bruto)
+      if (!r.ok) return NextResponse.json({ error: r.error }, { status: 400 })
+      leadIdsLimpios = r.ids
+    }
+  }
+  const envioSelectivo = leadIdsLimpios !== null
+
+  // Evitar duplicados en cola.
+  //
+  // Para `send` se relaja: encadenar varias tandas dirigidas es un uso legítimo,
+  // así que se permite si el job nuevo es selectivo Y todos los que ya están en
+  // cola también lo son. Cualquier envío masivo (sin leadIds) sigue bloqueando,
+  // porque barrería igualmente a los leads que se acaban de seleccionar.
+  const activos = await prisma.prospectJob.findMany({
     where: { type, status: { in: ["pending", "running"] } },
+    select: { params: true },
   })
-  if (existing && type !== "scrape") {
-    return NextResponse.json(
-      { error: `Ya hay un job "${type}" en cola o ejecutándose` },
-      { status: 409 }
-    )
+
+  if (activos.length > 0 && type !== "scrape") {
+    const permitido =
+      type === "send" &&
+      envioSelectivo &&
+      activos.every((j) => {
+        const ids = (j.params as { leadIds?: unknown } | null)?.leadIds
+        return Array.isArray(ids) && ids.length > 0
+      })
+
+    if (!permitido)
+      return NextResponse.json(
+        {
+          error:
+            type === "send"
+              ? "Ya hay un envío en cola. Espera a que termine, o lanza tandas seleccionando leads concretos."
+              : `Ya hay un job "${type}" en cola o ejecutándose`,
+        },
+        { status: 409 }
+      )
   }
 
+  // Se construyen explícitamente: los ids que se guardan son siempre los ya
+  // normalizados, sin depender de que una mutación anterior se haya reflejado.
+  const paramsFinales = {
+    ...((params ?? {}) as Record<string, unknown>),
+    ...(leadIdsLimpios ? { leadIds: leadIdsLimpios } : {}),
+  } as Prisma.InputJsonValue
+
   const job = await prisma.prospectJob.create({
-    data: { type, params: jsonParams },
+    data: { type, params: paramsFinales },
   })
 
   return NextResponse.json(job, { status: 201 })

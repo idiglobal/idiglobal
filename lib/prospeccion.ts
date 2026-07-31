@@ -187,3 +187,65 @@ export function leadSignals(intentSignals: string | null) {
 
 export const MAX_EMAILS_PER_DAY = 50
 export const MAX_SCRAPE_LIMIT = 25
+
+/** Tope de leads por envío selectivo. Espejo del límite validado en la API. */
+export const MAX_LEAD_IDS = 200
+
+/**
+ * Normaliza la lista de ids de un envío selectivo.
+ *
+ * Espejo en la app de `_normalizar_lead_ids` del worker, pero más estricto: el
+ * worker solo se defiende de una fila corrupta en la BD, aquí es donde se
+ * valida de verdad (ver CONTRATO_ENVIO_SELECTIVO.md).
+ *
+ * Devuelve error en vez de una lista vacía a propósito: el worker interpreta
+ * "leadIds presente pero vacío" como "no enviar a nadie", así que encolar eso
+ * sería crear un trabajo que no hace nada.
+ */
+export function normalizarLeadIds(
+  entrada: unknown
+): { ok: true; ids: number[] } | { ok: false; error: string } {
+  if (!Array.isArray(entrada))
+    return { ok: false, error: "leadIds debe ser un array de ids de lead" }
+
+  const ids = [
+    ...new Set(
+      entrada
+        .map((v) => (typeof v === "number" || typeof v === "string" ? Number(v) : NaN))
+        .filter((n) => Number.isInteger(n) && n > 0)
+    ),
+  ]
+
+  if (ids.length === 0)
+    return { ok: false, error: "La selección no contiene ningún lead válido" }
+
+  if (ids.length > MAX_LEAD_IDS)
+    return {
+      ok: false,
+      error: `Demasiados leads seleccionados (${ids.length}); el máximo es ${MAX_LEAD_IDS}`,
+    }
+
+  return { ok: true, ids }
+}
+
+/**
+ * Réplica de los descartes que hace el worker antes de enviar
+ * (ver CONTRATO_ENVIO_SELECTIVO.md en idiglobal-worker).
+ *
+ * Es una estimación optimista a propósito: desde el navegador no se puede
+ * consultar la lista de supresión, así que el worker todavía puede excluir
+ * alguno más. Sirve para avisar al usuario, no para decidir el envío.
+ */
+export function esEnviable(lead: {
+  status: string
+  email: string | null
+  emailBody: string | null
+  emailStatus: string
+}): boolean {
+  return (
+    lead.status === "borrador_generado" &&
+    !!lead.email &&
+    !!lead.emailBody &&
+    lead.emailStatus !== "invalido"
+  )
+}
