@@ -179,6 +179,13 @@ model ProspectSendLog {
   sentAt       DateTime @default(now()) @map("sent_at")
   sendDate     DateTime @default(dbgenerated("CURRENT_DATE")) @map("send_date") @db.Date
 
+  // Seguimiento real del envío. `success` solo dice que Resend aceptó la
+  // petición; lo que pasa después llega por webhook y se cruza con este id.
+  providerMessageId String?   @unique @map("provider_message_id") @db.VarChar(120)
+  deliveryStatus    String?   @map("delivery_status") @db.VarChar(20)
+  deliveryDetail    String?   @map("delivery_detail")
+  deliveryUpdatedAt DateTime? @map("delivery_updated_at")
+
   @@map("prospect_send_logs")
 }
 

@@ -60,6 +60,12 @@ export const SIGNAL_META: Record<string, { label: string; explain: string; point
     explain: "Publicó en internet que busca proveedor de personalización textil",
     points: 5,
   },
+  ropa_escolar: {
+    label: "Gestiona ropa del colegio",
+    explain:
+      "Su web o su AMPA ya vende sudaderas, chándal, batas o uniforme: compra prendas cada curso",
+    points: 5,
+  },
   solicita_proveedores: {
     label: "Pide proveedores",
     explain: "Su propia web pide proveedores o colaboradores",
